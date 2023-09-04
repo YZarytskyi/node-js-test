@@ -1,39 +1,28 @@
-const contacts = require('./contacts.js');
-const { Command } = require('commander');
+const express = require("express");
+const cors = require("cors");
+const contactsRouter = require("./routes/contacts");
 
-const program = new Command();
-program
-    .option('-a, --action <type>', 'choose action')
-    .option('-i, --id <type>', 'user id')
-    .option('-n, --name <type>', 'user name')
-    .option('-e, --email <type>', 'user email')
-    .option('-p, --phone <type>', 'user phone');
+const app = express()
 
-program.parse(process.argv);
+const PORT = 3000;
 
-const argv = program.opts();
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({extended: true}));
 
-function invokeAction({ action, id, name, email, phone }) {
-    switch (action) {
-        case 'list':
-            contacts.listContacts()
-            break;
+app.use('/contacts', contactsRouter)
 
-        case 'get':
-            contacts.getContactById(id)
-            break;
+app.use((req, res) => {
+    res.status(404).json({message: "Not found"})
+})
 
-        case 'add':
-            contacts.addContact(name, email, phone)
-            break;
+app.use((err, req, res, next) => {
+    const { status = 500, message = "Server error" } = err;
+    res.status(status).json({ message: message });
+});
 
-        case 'remove':
-            contacts.removeContact(id)
-            break;
+app.listen(PORT, () => {
+    console.log(`Server started on ${PORT}`);
+})
 
-        default:
-            console.warn('\x1B[31m Unknown action type!');
-    }
-}
-
-invokeAction(argv)
+module.exports = app
