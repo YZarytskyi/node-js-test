@@ -63,8 +63,23 @@ async function updateContact({contactId, name, email, phone}) {
         await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
 
         return updatedContact
-    } catch
-        (error) {
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function deleteContact(contactId) {
+    try {
+        const data = JSON.parse(await fs.readFile(contactsPath, "utf-8"))
+        const selectedContactIndex = data.findIndex((contact) => contact.id === contactId)
+        if (selectedContactIndex === -1) {
+            return null
+        }
+        const deletedContact = data.splice(selectedContactIndex, 1)[0]
+        await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
+
+        return deletedContact
+    } catch (error) {
         console.log(error)
     }
 }
