@@ -2,8 +2,7 @@ const {mongoose} = require('mongoose')
 
 const app = require('./index')
 
-const DB_HOST = 'mongodb+srv://Yurii:9kKJya6xLmwWgDrW@cluster0.yty0ac0.mongodb.net/contacts_reader?retryWrites=true&w=majority'
-const PORT = 3000;
+const {DB_HOST, PORT} = process.env
 
 mongoose.connect(DB_HOST)
     .then(() => {
