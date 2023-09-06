@@ -1,93 +1,42 @@
-const fs = require('fs/promises');
-const path = require('node:path');
-const {nanoid} = require("nanoid");
+const {Schema, model} = require('mongoose');
+const Joi = require("joi");
 
-const contactsPath = path.resolve('./db/contacts.json');
+const {handleMongooseError} = require('../helpers');
 
-async function listContacts() {
-    try {
-        const data = await fs.readFile(contactsPath, "utf-8")
-        return JSON.parse(data)
-    } catch (error) {
-        console.log(error)
-    }
-}
+const contactSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+    },
+    phone: {
+        type: String,
+        required: true,
+    },
+    favourite: {
+        type: Boolean,
+        default: false,
+    },
+}, {versionKey: false, timestamps: true})
 
-async function getContactById(contactId) {
-    try {
-        const data = await fs.readFile(contactsPath, "utf-8")
-        return JSON.parse(data).find((contact) => contact.id === contactId)
-    } catch (error) {
-        console.log(error)
-    }
-}
+contactSchema.post("save", handleMongooseError)
 
-async function removeContact(contactId) {
-    try {
-        const data = JSON.parse(await fs.readFile(contactsPath, "utf-8"))
-        const selectedContactIndex = data.findIndex((contact) => contact.id === contactId)
-        if (selectedContactIndex === -1) {
-            return
-        }
-        const deletedContact = data.splice(selectedContactIndex, 1)[0]
-        await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
+const addSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().required(),
+    phone: Joi.string().required(),
+    favourite: Joi.boolean(),
+})
 
-        return deletedContact || null
-    } catch (error) {
-        console.log(error)
-    }
-}
+const updateFavoriteScheme = Joi.object({
+    favorite: Joi.boolean().required()
+})
 
-async function addContact(name, email, phone) {
-    try {
-        const data = JSON.parse(await fs.readFile(contactsPath, "utf-8"))
-        const newContact = {id: nanoid(), name, email, phone}
-        data.push(newContact)
-        await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
+const schemas = {addSchema, updateFavoriteScheme}
 
-        return newContact
-    } catch (error) {
-        console.log(error)
-    }
-}
+const Contact = model('contact', contactSchema);
 
-async function updateContact({contactId, name, email, phone}) {
-    try {
-        const data = JSON.parse(await fs.readFile(contactsPath, "utf-8"))
-        const selectedContactIndex = data.findIndex((contact) => contact.id === contactId)
-        if (selectedContactIndex === -1) {
-            return null
-        }
-        const updatedContact = {id: contactId, name, email, phone}
-        data.splice(selectedContactIndex, 1, updatedContact)
-        await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
-
-        return updatedContact
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-async function deleteContact(contactId) {
-    try {
-        const data = JSON.parse(await fs.readFile(contactsPath, "utf-8"))
-        const selectedContactIndex = data.findIndex((contact) => contact.id === contactId)
-        if (selectedContactIndex === -1) {
-            return null
-        }
-        const deletedContact = data.splice(selectedContactIndex, 1)[0]
-        await fs.writeFile(contactsPath, JSON.stringify(data), "utf-8")
-
-        return deletedContact
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-module.exports = {
-    listContacts,
-    getContactById,
-    removeContact,
-    addContact,
-    updateContact
-}
+module.exports = {Contact, schemas}
