@@ -1,6 +1,6 @@
 const {mongoose} = require('mongoose')
 
-const app = require('./index')
+const app = require('./app')
 
 const {DB_HOST, PORT} = process.env
 
