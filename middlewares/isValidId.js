@@ -3,9 +3,10 @@ const {HttpError} = require("../helpers");
 
 const isValidId = (req, res, next) => {
     const {id} = req.params;
-    if(isValidObjectId(id)) {
+    if(!isValidObjectId(id)) {
         next(HttpError({status: 400, message: `${id} is not a valid id`}));
     }
+    next()
 }
 
 module.exports = isValidId
