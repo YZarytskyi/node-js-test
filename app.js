@@ -1,4 +1,5 @@
 const express = require("express");
+const logger = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -6,6 +7,10 @@ const contactsRouter = require("./routes/contacts");
 const authRouter = require("./routes/auth");
 
 const app = express()
+
+const isDev = process.env.NODE_ENV === 'development';
+
+if (isDev) app.use(logger('dev'));
 
 app.use(cors())
 app.use(express.json())

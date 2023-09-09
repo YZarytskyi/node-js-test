@@ -8,21 +8,18 @@ const contactSchema = new Schema({
         type: String,
         required: true,
     },
-    email: {
-        type: String,
-        required: true,
-    },
     phone: {
         type: String,
         required: true,
     },
-    favourite: {
+    favorite: {
         type: Boolean,
         default: false,
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'user', // name of the collection
+        required: true,
     }
 }, {versionKey: false, timestamps: true})
 
@@ -30,9 +27,8 @@ contactSchema.post("save", handleMongooseError)
 
 const addSchema = Joi.object({
     name: Joi.string().required(),
-    email: Joi.string().required(),
     phone: Joi.string().required(),
-    favourite: Joi.boolean(),
+    favorite: Joi.boolean(),
 })
 
 const updateFavoriteScheme = Joi.object({
